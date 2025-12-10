@@ -12,7 +12,7 @@
     "dev:firefox": "yarn patch:math-intrinsics && cross-env PARCEL_WORKER_BACKEND=process plasmo dev --target=firefox-mv3",
     "build:firefox": "yarn patch:math-intrinsics && cross-env PARCEL_WORKER_BACKEND=process plasmo build --target=firefox-mv3 --no-hoist",
     "dev:iframe": "vite",
-    "build:iframe": "vite build && yarn build:assets",
+    "build:iframe": "vite build --base ./ && yarn build:assets",
     "preview:iframe": "vite preview",
     "dev:sdk": "cd ./wander-connect-sdk/ && pnpm dev",
     "build:sdk": "cd ./wander-connect-sdk/ && pnpm build",
