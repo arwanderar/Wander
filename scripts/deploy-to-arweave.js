@@ -20,6 +20,10 @@ import Arweave from "arweave";
 import ArDBModule from "ardb";
 import mime from "mime";
 import { NodeArweaveWallet, createDataItemSigner } from "node-arweave-wallet";
+import dotenv from "dotenv";
+
+// Load .env file
+dotenv.config();
 
 const ArDB = ArDBModule.default || ArDBModule;
 
@@ -125,8 +129,74 @@ function isNextApp(files) {
   return files.some((file) => /_next[\\/]/.test(file.path));
 }
 
+// Required environment variables for deployment
+const REQUIRED_ENV_VARS = [
+  // Wander Connect
+  "VITE_IS_EMBEDDED_APP",
+  // WC Cloud Backup
+  "VITE_GOOGLE_CLIENT_ID",
+  "VITE_APPLE_CONTAINER_IDENTIFIER",
+  "VITE_APPLE_API_TOKEN",
+  "VITE_APPLE_ENVIRONMENT",
+  // WC Supabase - Production
+  "VITE_SUPABASE_URL",
+  "VITE_SUPABASE_ANON_KEY",
+  // WC API - Development
+  "VITE_DEV_DEFAULT_EMBEDDED_CLIENT_ID",
+  "VITE_DEV_DEFAULT_EMBEDDED_SERVER_BASE_URL",
+  // WC API - Production
+  "VITE_PROD_DEFAULT_EMBEDDED_CLIENT_ID",
+  "VITE_PROD_EMBEDDED_SERVER_BASE_URL",
+  // Transak
+  "VITE_TRANSAK_API_KEY",
+  "PLASMO_PUBLIC_TRANSAK_API_KEY",
+  "PLASMO_PUBLIC_TRANSAK_API_KEY_STAGING",
+  "TRANSAK_API_KEY",
+  "TRANSAK_FREE_API_KEY",
+  "PLASMO_PUBLIC_TRANSAK_TOP_TIER_API_KEY",
+];
+
+// Check that all required environment variables are set
+function checkRequiredEnvVars() {
+  console.log("🔑 Checking required environment variables...");
+
+  const missing = [];
+  const empty = [];
+
+  for (const envVar of REQUIRED_ENV_VARS) {
+    if (!(envVar in process.env)) {
+      missing.push(envVar);
+    } else if (!process.env[envVar] || process.env[envVar].trim() === "") {
+      empty.push(envVar);
+    }
+  }
+
+  if (missing.length > 0 || empty.length > 0) {
+    console.error("\n❌ Environment variable check failed!\n");
+
+    if (missing.length > 0) {
+      console.error("Missing variables:");
+      missing.forEach((v) => console.error(`   - ${v}`));
+    }
+
+    if (empty.length > 0) {
+      console.error("\nEmpty variables:");
+      empty.forEach((v) => console.error(`   - ${v}`));
+    }
+
+    console.error("\n📝 Please ensure all required variables are set in your .env file.");
+    console.error("   See the deployment documentation for required values.\n");
+    process.exit(1);
+  }
+
+  console.log(`✅ All ${REQUIRED_ENV_VARS.length} required environment variables are set\n`);
+}
+
 // Main deployment function
 async function deploy() {
+  // Check required environment variables first
+  checkRequiredEnvVars();
+
   const options = parseArgs();
   const distPath = path.resolve(options.distFolder);
 
